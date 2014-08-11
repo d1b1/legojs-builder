@@ -1,13 +1,17 @@
 <div class="row-fluid">
 	<div class="span10">
-		<div class="hero-unit">
-			<h1>LegoJS Builder</h1>
-			<p>This is your home page. To edit, modify home.html</p>
-		  <p>
-		    <a class="btn btn-primary btn-large" target="_blank" href="http://api.legoJS.io">
-		      Learn more about the API
-		    </a>
-		  </p>
+
+    <div class="row">
+	  		<div class="col-md-2" style="overflow: auto|scroll;">
+          <img src="<%= image %>">
+				</div>
+				<div class="col-md-3" style="overflow: auto|scroll;">
+					<h2>LegoJS Builder</h2>
+					<h3><i><%= name %></i></h3>
+				</div>
+				<div class="col-md-6" id="searchInfo" style="overflow: auto|scroll;">
+
+				</div>
 		</div>
 
     <div class="row">
@@ -16,7 +20,7 @@
 
         <table id="productPiecesTable" class="table table-striped table table-hover">
           <tr>
-            <td width="10%">Qty</td>
+            <td width="15%">Qty</td>
             <td width="5%"></td>
             <td>Name</td>
             <td>Category</td>

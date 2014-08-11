@@ -10,10 +10,12 @@ require([
 	var ApplicationRouter = Backbone.Router.extend({
 		routes: {
 			"": "home",
-			"*actions": "home"
 		},
 		initialize: function() {
-			this.headerView = new HeaderView();
+			this.productId = '53bc3c6cc9a1d802009d1432';
+			this.MainProduct = new Data.Models.MainProduct({ id: this.productId });
+
+			this.headerView = new HeaderView({ model: this.MainProduct });
 			this.headerView.render();
 
 			this.footerView = new FooterView();
@@ -21,20 +23,30 @@ require([
 
 			// Define the Collections.
 			this.search = new Data.Collections.SearchCollection();
+			this.search.productId = this.productId;
+
 			this.pieces = new Data.Collections.ProductCollection();
+			this.pieces.productId = this.productId;
 		},
 		home: function() {
-			this.homeView = new HomeView();
-			this.homeView.render();
+      var self = this;
 
-      this.pieceView = new Pieces.Table({ collection: this.pieces });
-			this.pieceView.render();
+      this.MainProduct.fetch().done(function() {
 
-			this.searchView = new Search.Form({ collection: this.search });
-			this.searchView.render();
+				self.homeView = new HomeView({ model: self.MainProduct });
+				self.homeView.render();
 
-			this.searchTable = new Search.Table({ collection: this.search, pieces: this.pieces });
-			this.searchTable.render();
+        self.pieces.fetch().done(function() {
+		      self.pieceView = new Pieces.Table({ collection: self.pieces });
+					// self.pieceView.render();
+				});
+
+				self.searchView = new Search.Form({ collection: self.search, productId: self.productId });
+				self.searchView.render();
+
+				self.searchTable = new Search.Table({ collection: self.search, pieces: self.pieces, productId: self.productId });
+				self.searchTable.render();
+			})
 
 		}
 	});
@@ -43,12 +55,10 @@ require([
 		el: "#header",
 		templateFileName: "header.html",
 		template: headerTpl,
-
-		initialize: function() {
-			// $.get(this.templateFileName, function(data){console.log(data);this.template=data});
-		},
 		render: function() {
-			$(this.el).html(_.template(this.template));
+			var self = this;
+
+      $(self.el).html(_.template(self.template));
 		}
 	});
 
@@ -62,13 +72,14 @@ require([
 
 	HomeView = Backbone.View.extend({
 		el: "#content",
-		// template: "home.html",
 		template: homeTpl,
 		initialize: function() {
 
 		},
 		render: function() {
-			$(this.el).html(_.template(this.template));
+			var self = this;
+
+			$(self.el).html(_.template(self.template, this.model.toJSON()));
 		}
 	});
 

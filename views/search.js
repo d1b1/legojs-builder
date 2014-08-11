@@ -7,7 +7,7 @@ define([
   var Views = {};
 
   Views.Form = Backbone.View.extend({
-    el: "#search",
+    el: "#searchInfo",
 
     template: formTpl,
 
@@ -16,11 +16,11 @@ define([
       'keyup #searchTerm': 'search'
     },
 
-    search: function(evt) {
-      this.collection.term = $(evt.currentTarget).val();
-      $('#resultsTable', this.el).empty();
+    search: _.debounce(function(evt) {
+      this.collection.name = $(evt.currentTarget).val();
+      $('#resultsTable').empty();
       this.collection.fetch();
-    },
+    }, 300),
 
     render: function() {
       $(this.el).prepend(_.template(this.template));
@@ -41,13 +41,24 @@ define([
 
       // Store the external collection.
       this.pieces = options.pieces;
+      this.productId = options.productId;
 
       this.model.bind('change', this.render);
     },
 
     addBrickToProduct: function(){
-      this.model.set('qty', 1);
-      this.pieces.add(this.model);
+      var self = this;
+      var newPiece = new Data.Models.Piece({ count: 1, brick: this.model.id });
+      newPiece.productId = this.productId;
+
+      newPiece.save().done(function() {
+        newPiece.fetch().done(function() {
+          self.pieces.add( newPiece );
+        });
+      }).fail(function() {
+        alert('Failed to insert Product Piece.');
+      });
+
     },
 
     render: function() {
@@ -64,6 +75,7 @@ define([
       _.bindAll(this, 'render', 'appendResult');
 
       this.pieces = options.pieces;
+      this.productId = options.productId;
 
       this.collection.bind('add', this.appendResult);
       this.render();
@@ -72,15 +84,22 @@ define([
     render: function() {
       var self = this;
 
+      $('#resultsTable', this.el).empty();
+
       _(this.collection.models).each(function(brick){
         self.appendResult(brick);
       }, this);
+
+      if (this.collection.length == 0) {
+        $('#resultsTable', this.el).append($('<tr><td align=center colspan="4">Nothing Found. Try Again.</td></tr>'));
+      }
     },
 
     appendResult: function(brick) {
       var aview = new Views.Tr({
         model: brick,
-        pieces: this.pieces
+        pieces: this.pieces,
+        productId: this.productId
       });
 
       $('#resultsTable', this.el).append(aview.render().el);
