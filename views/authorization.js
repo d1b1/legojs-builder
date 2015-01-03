@@ -305,6 +305,7 @@ define([
       // If we are not making a call to login, and we
       // do not have the required tokens then do not
       // include an auth value.
+
       if (includeToken && !accessToken && !accessSecret) {
         return null;
       }

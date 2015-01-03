@@ -33,7 +33,7 @@ require.config({
 
 require(
   [ 'backbone',
-	'libs/text!header.html',
+	'libs/text!templates/general/header.html',
 	'libs/text!home.html',
 	'libs/text!builder.html',
 	'libs/text!footer.html',
@@ -45,19 +45,45 @@ require(
 	'/views/mine.js',
 	'libs/text!products.html',
 	'/views/authorization.js',
-	'/views/login.js'
+	'/views/login.js',
+	'config.js',
+	'/views/header.js',
+	'/views/about.js',
+	'/views/register.js'
   ],
-function(Backbone, headerTpl, homeTpl, builderTpl, footerTpl, myKitsTpl, Search, Pieces, Data, Products, Mine, productListTpl, Authorization, Login) {
+function(Backbone, headerTpl, homeTpl, builderTpl, footerTpl, myKitsTpl, Search, Pieces, Data, Products, Mine, productListTpl, Authorization, Login, Config, Header, About, Register) {
 
-	var authConfig = {
-	  key: 'abc123',
-	  secret: 'ssh-secret'
+    $.fn.serializeObject = function() {
+	   var o = {};
+	   var a = this.serializeArray();
+	   $.each(a, function() {
+	       if (o[this.name]) {
+	           if (!o[this.name].push) {
+	               o[this.name] = [o[this.name]];
+	           }
+	           o[this.name].push(this.value || '');
+	       } else {
+	           o[this.name] = this.value || '';
+	       }
+	   });
+	   return o;
 	};
 
-	var AuthService = Authorization(authConfig);
+    window.env = 'local';
 
-    Backbone.originalSync = Backbone.sync;
-    Backbone.sync = function (method, model, opts) {
+    var Session = Backbone.Model.extend({
+	  url: '/user/current',
+	  isloggedIn: function() {
+	  	return !_.isUndefined(this.get('username'));
+	  }
+	});
+
+	window.Session = new Session();
+
+	var AuthService = Authorization(Config.authConfig);
+
+ 	Backbone.originalSync = Backbone.sync;
+ 	Backbone.sync = function (method, model, opts) {
 	    var xhr, dfd;
 	    dfd = $.Deferred();
 
@@ -86,7 +112,7 @@ function(Backbone, headerTpl, homeTpl, builderTpl, footerTpl, myKitsTpl, Search,
 	            dfd.resolve.apply(xhr, arguments);
 	        } else {
 	            if (xhr.status === 200 || xhr.status === 302 || xhr.status === 0) {
-	                console.log('login');
+	                 ('login');
 	            }
 	            dfd.reject.apply(xhr, arguments);
 	        }
@@ -97,9 +123,14 @@ function(Backbone, headerTpl, homeTpl, builderTpl, footerTpl, myKitsTpl, Search,
 	};
 
     $.ajaxPrefilter(function(options, originalOptions, jqXHR) {
+
+        options.url = Config[window.env].url + options.url;
+        originalOptions.url = Config[window.env].url + originalOptions.url;
+
         options.crossDomain ={
             crossDomain: true
         };
+
         options.xhrFields = {
             withCredentials: false
         };
@@ -109,6 +140,15 @@ function(Backbone, headerTpl, homeTpl, builderTpl, footerTpl, myKitsTpl, Search,
         cache: false,
         statusCode: {
           401: function(req) {
+
+            // If we got a 401 from a get current user
+            // then we do not force a login, since it 
+            // is ok to be anonymous.
+            
+          	if (this.url.match(/user\/current/g)) {
+              return;
+          	}
+
             new Login.Form({}).render();
             if (req) req.abort();
           }
@@ -117,22 +157,19 @@ function(Backbone, headerTpl, homeTpl, builderTpl, footerTpl, myKitsTpl, Search,
 
 	var ApplicationRouter = Backbone.Router.extend({
 		routes: {
-			"": "home",
+			"":             "home",
 			"products":     "products",
             "products/:id": "builder",
-            "mine":         "mine"
+            "mine":         "mine",
+            "about":        "about",
+            "register":     "register"
 		},
 		initialize: function() {
-			this.productId = '53bc3c6cc9a1d802009d1432';
-			this.MainProduct = new Data.Models.MainProduct({ id: this.productId });
-
-			this.headerView = new HeaderView({ model: this.MainProduct });
+			this.headerView = new Header({ model: window.Session });
 			this.headerView.render();
 
 			this.footerView = new FooterView();
 			this.footerView.render();
-
-			// this.productListView = new ProductListView();
 
 			// Define the Collections.
 			this.search = new Data.Collections.SearchCollection();
@@ -149,6 +186,18 @@ function(Backbone, headerTpl, homeTpl, builderTpl, footerTpl, myKitsTpl, Search,
 			self.homeView = new HomeView();
 			self.homeView.render();
 		},
+		register: function() {
+			var self = this;
+
+			self.registerView = new Register();
+			self.registerView.render();
+		},
+		about: function() {
+			var self = this;
+
+			self.aboutView = new About();
+			self.aboutView.render();
+		},
 		products: function() {
 			var self = this;
 
@@ -162,7 +211,7 @@ function(Backbone, headerTpl, homeTpl, builderTpl, footerTpl, myKitsTpl, Search,
 		mine: function() {
 			var self = this;
 
-			this.myProducts = new Data.Collections.MyProducts([], { ownerId: '54a37ab2593a67c96cbcfb71' });
+			this.myProducts = new Data.Collections.MyProducts([], { ownerId: window.Session.get('_id') });
 
       		self.myProductView = new MineView();
 			self.myProductView.render();
@@ -196,17 +245,6 @@ function(Backbone, headerTpl, homeTpl, builderTpl, footerTpl, myKitsTpl, Search,
 		     self.searchTable = new Search.Table({ collection: self.search, pieces: self.pieces, productId: id });
 		     self.searchTable.render();
 		   })
-		}
-	});
-
-	HeaderView = Backbone.View.extend({
-		el: "#header",
-		templateFileName: "header.html",
-		template: headerTpl,
-		render: function() {
-			var self = this;
-
-      		$(self.el).html(_.template(self.template));
 		}
 	});
 
@@ -282,5 +320,16 @@ function(Backbone, headerTpl, homeTpl, builderTpl, footerTpl, myKitsTpl, Search,
 	});
 
 	app = new ApplicationRouter();
-	Backbone.history.start();
+
+	window.Session.fetch({
+	  success: function() {
+	    Backbone.history.start();
+	  },
+	  error: function(err) {
+        Backbone.history.start();
+	    // TODO: Find a better way to handle this state change.
+
+	    console.log('No active Session. Start in ANON Mode.');
+	  }
+	});
 });

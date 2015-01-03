@@ -1,6 +1,6 @@
 define([
   'paginator',
-  'backbone',
+  'backbone'
 ], function (Paginator, Backbone) {
 
   var Models = {};
@@ -9,7 +9,7 @@ define([
   Models.MainProduct = Backbone.Model.extend({
     // idAttribute: '_id',
     url: function() {
-      return 'http://api.legojs.io/product/' + this.id;
+      return '/product/' + this.id;
     }
   });
 
@@ -22,9 +22,9 @@ define([
       var productId = this.productId ? this.productId : this.collection.productId;
 
       if (this.isNew()) {
-        return 'http://api.legojs.io/product/' + productId + '/piece';
+        return '/product/' + productId + '/piece';
       } else {
-        return 'http://api.legojs.io/product/' + productId + '/piece/' + this.id;
+        return '/product/' + productId + '/piece/' + this.id;
       }
     }
   });
@@ -39,10 +39,37 @@ define([
     url: 'http://api.legojs.io/brick'
   });
 
+  Models.User = Backbone.Model.extend({
+    url: function() {
+      if (this.isNew()) {
+        return '/user';
+      } else {
+        return '/user/' + this.get('_id');
+      }
+    },
+    validate: function(attrs, options) {
+      if (!attrs.name) {
+        return 'Name';
+      }
+
+      if (!attrs.email) {
+        return 'Missing Email';
+      }
+
+      if (!attrs.username) {
+        return 'Missing Username';
+      }
+
+      if (!attrs.password) {
+        return 'Missing Password';
+      }
+    }
+  });
+
   Collections.ProductCollection = Backbone.Collection.extend({
     model: Models.Piece,
     url: function() {
-      return 'http://api.legojs.io/product/' + this.productId + '/pieces';
+      return '/product/' + this.productId + '/pieces';
     },
     parse: function(data) {
       return data.manifest;
@@ -59,7 +86,7 @@ define([
 
   Collections.SearchCollection = Backbone.Collection.extend({
     url: function() {
-      return 'http://api.legojs.io/brick/search?name=' + this.name;
+      return '/brick/search?name=' + this.name;
     },
     model: Models.Brick,
     parse: function(data) {
@@ -76,7 +103,18 @@ define([
       name: '',
       category: ''
     },
-    url: 'http://api.legojs.io/product'
+    url: '/product'
+  });
+
+  Models.MyProduct = Backbone.Model.extend({
+    idAttribute: '_id',
+    url: function() {
+      if (this.isNew()) {
+        return '/user/' + window.Session.get('_id') + '/products';
+      } else {
+        return '/user/' + window.Session.get('_id') + '/products/' + this.get('_id');
+      }
+    }
   });
 
   Collections.Products = Backbone.PageableCollection.extend({
@@ -84,7 +122,7 @@ define([
 
     model: Models.Product,
 
-    url: 'http://api.legojs.io/product/search',
+    url: '/product/search',
 
     /* Initial pagination states */
     state: {
@@ -122,13 +160,13 @@ define([
 
     initialize: function(models, opts) {
       this.ownerId = opts.ownerId;
-
-      console.log('ssss', this);
     },
 
-    // model: Models.Product,
+    model: Models.MyProduct,
 
-    url: 'http://api.legojs.io/user/54a37ab2593a67c96cbcfb71/products',
+    url: function() {
+      return '/user/' + this.ownerId + '/products';
+    }
 
   });
 

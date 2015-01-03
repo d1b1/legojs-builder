@@ -2,8 +2,10 @@ define([
    'backbone',
    'libs/text!templates/login/form.html',
    'jquery',
-   'bootstrap'
-], function (Backbone, formTpl, $, Bootstrap) {
+   'bootstrap',
+   '/views/authorization.js',
+   'config.js'
+], function (Backbone, formTpl, $, Bootstrap, Authorization, Config) {
 
   var Views = {};
 
@@ -11,49 +13,52 @@ define([
 
     template: formTpl,
     
+    initialize: function() {
+      this.isActive = false;
+    },
+
     events: {
       'click .actionButton': 'action'
     },
 
-	unload: function() {
-	  this.$el.modal('close');
+  	unload: function() {
+      $('.modal-backdrop').hide();
 
-	  this.unbind();
-	  this.undelegateEvents();
-
+      this.isActive = false;
+  	  this.unbind();
+  	  this.undelegateEvents();
       this.remove();
-	},
+  	},
 
     className: 'modal hide fade',
 
     render: function() {
       var self = this;
-      this.$el.html(this.template);
-      this.$el.modal({ show: true }).removeClass('fade').removeClass('hide');
 
-      return this;
+      if (!this.isActive) {
+        this.isActive = true;
+        this.$el.html(this.template);
+        this.$el.modal({ show: true }).removeClass('fade').removeClass('hide');
+
+        return this;
+      }
     },
 
     action: function(evt) {
       var self = this;
       var formData = $('#modalForm').serializeObject();
 
-      var authConfig = {
-        key: 'abc123',
-        secret: 'ssh-secret'
-      };
-
-      var AuthService = Authorization(authConfig);
-      var url = 'http://api.formagg.io/authenticate/accesstoken';
+      var AuthService = Authorization(Config.authConfig);
+      var url = '/authenticate/accesstoken';
 
       var opts = {
         url: url,
-        type: 'Post',
-        contentType: "application/json",
-        dataType: "json",
+        type: 'POST',
+        contentType: 'application/json',
+        dataType: 'json',
         processData: false,
         data: JSON.stringify(formData),
-        headers: { 'Authorization': AuthService.getSignature(url, 'POST') }
+        headers: { 'Authorization': AuthService.getSignature(Config[window.env].url + '/authenticate/accesstoken', 'POST') }
       };
 
       $.ajax(opts)
@@ -63,7 +68,12 @@ define([
           localStorage.setItem('tokenId', data.tokenId);
           localStorage.setItem('secret', data.secret);
 
+          self.$el.modal( { show: false });
           self.unload();
+
+          window.Session.fetch().done(function() {
+            Backbone.history.loadUrl(Backbone.history.fragment);
+          });
         })
         .fail(function( data ) {
           var errorMsg = JSON.parse(data.responseText);

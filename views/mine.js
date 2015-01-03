@@ -24,16 +24,10 @@ define([
     },
 
     unOwn: function(e) {
-
-      // Refactor this into a model and or a view.
-      $.ajax({
-          url: this.model.url() + '/' + this.model.get('_id'),
-          type: 'DELETE',
-          success: function(result) {
-             alert('all done');
-          }
+      var self = this;
+      this.model.destroy().done(function() {
+        self.remove();
       });
-
     },
 
     initialize: function(options){

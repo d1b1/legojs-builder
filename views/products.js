@@ -18,16 +18,10 @@ define([
     },
 
     ownProduct: function(e) {
+      var myProduct = new Data.Models.MyProduct();
 
-      // TODO: Refactor this to make it use a model.
-      $.ajax({
-          url: 'http://api.legojs.io/user/54a37ab2593a67c96cbcfb71/products',
-          type: 'POST',
-          data: { product: this.model.id },
-          success: function(result) {
-             alert('all done');
-          }
-      });
+      myProduct.set('product', this.model.id);
+      myProduct.save(null);
     },
 
     initialize: function(options){
