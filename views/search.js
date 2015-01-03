@@ -1,8 +1,9 @@
 define([
+   'backbone',
    'libs/text!templates/search/form.html',
    'libs/text!templates/search/tr.html',
    '/data/models.js'
-], function (formTpl, trTpl, Data) {
+], function (Backbone, formTpl, trTpl, Data) {
 
   var Views = {};
 
@@ -18,9 +19,11 @@ define([
 
     search: _.debounce(function(evt) {
       this.collection.name = $(evt.currentTarget).val();
+
       $('#resultsTable').empty();
+      
       this.collection.fetch();
-    }, 300),
+    }, 100),
 
     render: function() {
       $(this.el).prepend(_.template(this.template));

@@ -1,7 +1,8 @@
 define([
+   'backbone',
    'libs/text!templates/pieces/tr.html',
    '/data/models.js'
-], function (trTpl, Data) {
+], function (Backbone, trTpl, Data) {
 
   var Views = {};
 
@@ -16,7 +17,7 @@ define([
     },
 
     changeCount: _.debounce(function(evt) {
-      
+
       var self = this;
       this.model.set('count', $(evt.currentTarget).val());
 

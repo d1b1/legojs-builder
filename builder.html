@@ -1,0 +1,52 @@
+<div class="row-fluid">
+	<div class="span10">
+
+    <div class="row">
+	  		<div class="col-md-2" style="overflow: auto|scroll;">
+          <img src="<%= image %>">
+				</div>
+				<div class="col-md-6" style="overflow: auto|scroll;">
+					<h2><i><%= name %></i></h2>
+
+          <p><i class="numOfBricks">-</i></p>
+          <p><i class="numOfPieces">-</i></p>
+				</div>
+				<div class="col-md-3" id="searchInfo" style="overflow: auto|scroll;">
+
+				</div>
+		</div>
+
+    <div class="row">
+      <div class="col-md-8" id="inventory" style="overflow: auto|scroll;">
+        <!-- the container that gets populated with the index -->
+
+        <table id="productPiecesTable" class="table table-striped table table-hover">
+          <tr>
+            <td width="15%">Qty</td>
+            <td width="5%"></td>
+            <td>Name</td>
+            <td>Category</td>
+            <td width="5%">&nbsp;</td>
+          </tr>
+        </table>
+
+      </div>
+      <div class="col-md-4" id="search">
+          <!-- we are going to debug our backbone collection here -->
+
+            <table id="resultsTable" class="table table-striped table table-hover">
+              <tr>
+                <td width="5%"><img src="" alt="" /></td>
+                <td>Brick Name</td>
+                <td>Category</td>
+                <td>&nbsp;</td>
+              </tr>
+            </table>
+
+      </div>
+    </div>
+
+  </div>
+
+	</div>
+</div>
