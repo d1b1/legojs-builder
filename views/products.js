@@ -57,6 +57,19 @@ define([
 
     template: tableTpl,
 
+    events: {
+      'keyup input[name="term"]': 'search'
+    },
+
+    search: function(evt) {
+      evt.preventDefault();
+
+      this.collection.queryParams.name = $(evt.currentTarget).val();
+
+      $('tbody', this.el).empty();
+      this.collection.fetch();
+    },
+
     initialize: function(options){
       _.bindAll(this, 'render', 'appendResult');
 
@@ -64,6 +77,7 @@ define([
       this.productId = options.productId;
 
       this.collection.bind('add', this.appendResult);
+      this.collection.bind('sync', this.appendResult);
       this.render();
     },
 

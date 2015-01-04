@@ -40,6 +40,7 @@ define([
   });
 
   Models.User = Backbone.Model.extend({
+    idAttribute: '_id',
     url: function() {
       if (this.isNew()) {
         return '/user';
@@ -60,8 +61,10 @@ define([
         return 'Missing Username';
       }
 
-      if (!attrs.password) {
-        return 'Missing Password';
+      if (this.isNew()) {
+        if (!attrs.password) {
+          return 'Missing Password';
+        }
       }
     }
   });

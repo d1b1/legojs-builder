@@ -28,7 +28,6 @@ define([
       User.save().done(function() {
         alert('New User Created');
       });
-
     },
 
     render: function() {

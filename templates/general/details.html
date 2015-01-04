@@ -1,0 +1,40 @@
+<div class="row-fluid">
+
+    <div class="row">
+      <div class="col-md-offset-3 col-md-6">
+
+        <div class="">
+          <h3>
+              Your Account
+          </h3>
+
+          <p>
+            Need to update your account. Use this form to make any changes you need.
+          </p>
+
+          <form id="detailsForm">
+            <div class="form-group">
+              <label for="name">Full Name</label>
+              <input type="text" class="form-control" value="<%= name %>" name="name" id="name" placeholder="Enter your name">
+            </div>
+
+            <div class="form-group">
+              <label for="username">Username</label>
+              <input type="text" class="form-control" value="<%= username %>" name="username" id="username" placeholder="Enter your username">
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email address</label>
+              <input type="email" class="form-control" value="<%= email %>" name="email" id="email" placeholder="Enter email">
+            </div>
+           
+            <button type="submit" class="btn btn-success saveButton">Save Changes</button>
+          </form>
+
+        </div>
+
+      </div>
+     
+    </div>
+
+</div>

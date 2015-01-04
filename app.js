@@ -49,9 +49,12 @@ require(
 	'config.js',
 	'/views/header.js',
 	'/views/about.js',
-	'/views/register.js'
+	'/views/register.js',
+	'/views/details.js',
+	'/views/password.js',
+	'/views/invite.js'
   ],
-function(Backbone, headerTpl, homeTpl, builderTpl, footerTpl, myKitsTpl, Search, Pieces, Data, Products, Mine, productListTpl, Authorization, Login, Config, Header, About, Register) {
+function(Backbone, headerTpl, homeTpl, builderTpl, footerTpl, myKitsTpl, Search, Pieces, Data, Products, Mine, productListTpl, Authorization, Login, Config, Header, About, Register, Details, Password, Invite) {
 
     $.fn.serializeObject = function() {
 	   var o = {};
@@ -162,7 +165,10 @@ function(Backbone, headerTpl, homeTpl, builderTpl, footerTpl, myKitsTpl, Search,
             "products/:id": "builder",
             "mine":         "mine",
             "about":        "about",
-            "register":     "register"
+            "register":     "register",
+            "details":      "details",
+            "password":     "password",
+            "invite":       "invite"
 		},
 		initialize: function() {
 			this.headerView = new Header({ model: window.Session });
@@ -191,6 +197,33 @@ function(Backbone, headerTpl, homeTpl, builderTpl, footerTpl, myKitsTpl, Search,
 
 			self.registerView = new Register();
 			self.registerView.render();
+		},
+		details: function() {
+			var self = this;
+			var user = new Data.Models.User({ _id: window.Session.get('_id')});
+
+			user.fetch().then(function() {
+				self.detailsView = new Details({ model: user });
+				self.detailsView.render();
+			});
+		},
+		password: function() {
+			var self = this;
+			var user = new Data.Models.User({ _id: window.Session.get('_id')});
+
+			user.fetch().then(function() {
+				self.passwordView = new Password({ model: user });
+				self.passwordView.render();
+			});
+		},
+		invite: function() {
+			var self = this;
+			var user = new Data.Models.User({ _id: window.Session.get('_id')});
+
+			user.fetch().then(function() {
+				self.inviteView = new Invite({ model: user });
+				self.inviteView.render();
+			});
 		},
 		about: function() {
 			var self = this;
