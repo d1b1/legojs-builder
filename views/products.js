@@ -3,10 +3,33 @@ define([
    'backgrid',
    'libs/text!templates/products/table.html',
    'libs/text!templates/products/tr.html',
-   '/data/models.js'
-], function (Backbone, Backgrid, tableTpl, trTpl, Data) {
+   '/data/models.js',
+   'libs/text!templates/search/form.html'
+], function (Backbone, Backgrid, tableTpl, trTpl, Data, formTpl) {
 
   var Views = {};
+
+  Views.Form = Backbone.View.extend({
+    el: "#searchInfo",
+
+    template: formTpl,
+
+    events: {
+      'keyup #searchTerm': 'search'
+    },
+
+    search: _.debounce(function(evt) {
+      this.collection.queryParams.name = $(evt.currentTarget).val();
+
+      $('#resultsTable').empty();
+      
+      this.collection.fetch();
+    }, 200),
+
+    render: function() {
+      $(this.el).prepend(_.template(this.template));
+    }
+  });
 
   Views.Tr = Backbone.View.extend({
     tagName: 'tr',
@@ -39,11 +62,13 @@ define([
     },
 
     render: function() {
+      console.log('sssss', this.model);
       var jsonData =  this.model.toJSON();
       if (!jsonData.manifest) {
         jsonData.manifest = [];
       }
 
+      console.log('jsonData', jsonData);
       jsonData.numOfPieces = jsonData.manifest.length;
 
       $(this.el).html(_.template(this.template, jsonData));
@@ -77,7 +102,7 @@ define([
       this.productId = options.productId;
 
       this.collection.bind('add', this.appendResult);
-      this.collection.bind('sync', this.appendResult);
+      // this.collection.bind('sync', this.appendResult);
       this.render();
     },
 

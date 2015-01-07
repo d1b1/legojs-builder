@@ -240,6 +240,9 @@ function(Backbone, headerTpl, homeTpl, builderTpl, footerTpl, myKitsTpl, Search,
 			this.productListView = new Products.Table({ collection: this.products });
 			this.productListView.render();
 			this.products.fetch();
+
+			this.productSearchView = new Products.Form({ collection: this.products });
+		    this.productSearchView.render();
 		},
 		mine: function() {
 			var self = this;
