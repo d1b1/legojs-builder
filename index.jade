@@ -1,0 +1,40 @@
+html
+  head
+    meta(charset="utf-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0") 
+    title The Master Builder 
+
+    link(href="/dist/release/index.css", rel="stylesheet") 
+
+    style.
+      body
+        min-height: 2000px;
+        padding-top: 70px;
+
+    script.
+      window.API_URL = "#{api_url}";
+      window.APP_VERSION = "#{app_version}";
+      
+      var require = {
+        config: {
+          app:{
+            API_URL: "#{api_url}",
+            APP_VERSION: "#{app_version}"
+          }
+        }
+      };
+
+    script(data-main="config", src="/dist/release/require.js?v=#{app_version}")
+
+  body
+    .container
+      .row
+        .col-md-12
+          #header
+      .row
+        .col-md-12
+          #content
+      .row
+        .col-md-12
+          #footer
+

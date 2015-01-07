@@ -10,9 +10,10 @@ module.exports = function (grunt) {
       combine: {
         files: {
           'dist/release/index.css': [
-            'assets/css/global/normalize.css',
-            'assets/css/screen.css',
-            'assets/css/custom/jquery-ui-1.8.19.custom.css'
+            'css/bootstrap.css',
+            'css/backgrid.css',
+            'css/extensions/paginator/backgrid-paginator.css',
+            'css/extensions/text-cell/backgrid-text-cell.css'
           ]
         }
       }
@@ -26,6 +27,7 @@ module.exports = function (grunt) {
 
     // TODO: Move the file setup from S3 to this copy so we have a better
     // place to test before pushing.
+
     copy: {
       dist: {
         files: [
@@ -33,6 +35,21 @@ module.exports = function (grunt) {
           { dest: 'dist/release/', src: 'assets/img/**' },
           { dest: 'dist/release/', src: 'assets/css/fonts/**/*' }
         ]
+      }
+    },
+
+    jade: {
+      index: {
+        options: {
+          pretty: true,
+          data: {
+            api_url: 'http://builder.legojs.io',
+            app_version: '<%= pkg.version %>'
+          }
+        },
+        files: {
+          'dist/index.html': [ 'index.jade' ]
+        }
       }
     },
 
@@ -68,8 +85,18 @@ module.exports = function (grunt) {
   });
 
   // Composite Tasks
+
+  // The 'default' tasks is called when the `grunt` CLI command is
+  // executed. This will only do the basic cleanup, template and require
+  // work. 
+
   grunt.registerTask('default', [ 'clean', 'jst', 'requirejs', 'concat' ]);
-  grunt.registerTask('prepare', [ 'default', 'uglify', 'cssmin', 'copy' ]);
+
+  // The 'release' task takes the code and prepares it for production
+  // deployment, basically making it smaller and the source code harder
+  // to view. 
+  
+  grunt.registerTask('release', [ 'default', 'uglify', 'cssmin', 'copy', 'jade:index' ]);
 
   // Load the Grunt Packages.
   grunt.registerTask('automate:import', ['exec:import']);
